@@ -34,7 +34,8 @@ See xbuildData script in examples directory.
 
 ### train.py
 **Using the database created by buildData.py, make the training**\
-see train.inp and ./xtrain bash script in examples directory.
+See train.inp and ./xtrain bash script in examples directory.
+See getArgments() function in [src/Utils/UtilsFunctions](https://github.com/allouchear/EquiNNx/blob/master/src/Utils/UtilsFunctions.py) to obtain all input parameters.
 
 ### evaluation.py
 **Test the models (one or an ensemble of models) using a database**\
