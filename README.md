@@ -4,8 +4,8 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 ## Requirement
- - jax, 
- - E3x 
+ - jax
+ - e3x 
  - ase
 
 After installation of conda, and activation of your environnement,  Type : 
