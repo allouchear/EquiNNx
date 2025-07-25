@@ -49,7 +49,7 @@ def getArguments():
 	parser.add_argument("--output_file_name", default='evaluation.npz', type=str, help="Name of the output file in npz format. Default=evaluation.npz")
 	parser.add_argument("--verbose", default=1, type=int, help="Verbose. 0=> minimum of output  Default=1")
 	parser.add_argument("--seed", default=-1, type=int, help="-1=> no shuffle.")
-	parser.add_argument("--loss_type", default='mse', type=str, help="loss type : mse (mean squared error) or mea (mean absolute error) or r2mean (1-R2(mean)). Default=mse")
+	parser.add_argument("--loss_type", default='mse', type=str, help="loss type : mse (mean squared error) or mae (mean absolute error) or r2mean (1-R2(mean)). Default=mse")
 
 	#if no command line arguments are present, config file is parsed
 	config_file='config.txt'

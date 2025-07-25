@@ -111,7 +111,7 @@ def getArguments():
 	parser.add_argument("--num_train", type=int, default=1,  help="number of training samples")
 	parser.add_argument("--num_valid", type=int,  default=1, help="number of validation samples")
 	parser.add_argument("--num_test", type=int, default=-1,  help="number of test samples. Default : nAll-num_valid-num_train")
-	parser.add_argument("--loss_type", default='mse', type=str, help="loss type : mse (mean squared error) or mea (mean absolute error) or r2mean (1-R2(mean)). Default=mse")
+	parser.add_argument("--loss_type", default='mse', type=str, help="loss type : mse (mean squared error) or mae (mean absolute error) or r2mean (1-R2(mean)). Default=mse")
 	parser.add_argument("--model_to_load", default='last_step', type=str, help="best_train, best_valid, last_step (default=last_step)")
 	parser.add_argument("--output_types", default='edipole,polarizability,hyperpolarizability', type=str, help="List of properties to predict. Examples: edipole,polarizability,hyperpolarizability, energy, energybyatom, forces, sdipole, edipole, ..... For tensor property of rank 2, you can add 6 (alpha symmetric), for tensor of rank 3, you can add 10 (beta with 10 differents elements) or 18 (beta with 18 elements). Example : energy, edipole,polarizability,6,hyperpolarizability,18. Default : edipole,polarizability,hyperpolarizability (so general tensor for polarizability and hyperpolarizability without any symmetry")
 	parser.add_argument("--output_ranks", default=None, help="List of output ranks, with the same order than output_types. Default : 1 for edipole, 2 for polarizability, 3 for hyperpolarizability and 0 for others")
