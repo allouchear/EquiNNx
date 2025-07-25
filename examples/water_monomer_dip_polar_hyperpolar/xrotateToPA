@@ -1,0 +1,11 @@
+#!/bin/bash 
+
+source config.sh
+#export CUDA_VISIBLE_DEVICES='' # to force CPU use
+
+export DISPLAY='' # to avoid display figures. Figures saved in .pdf
+
+fnpz="evaluation.npz"
+prog=$EQUINNX_TOOLS//'rotateToPA.py'
+fn=${fnpz%.npz}
+python $prog --input_file_name=${fn}.npz --n_embeded_atoms=-1 --output_file_name=${fn}_rotated.npz

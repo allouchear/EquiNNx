@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# chekc config.sh : can be change with linux system
+source config.sh
+
+echo "Buildind data in h5 file"
+./xbuildData >& xbuildData.out
+echo "See file xbuildData.out"
+
+echo "Split data in training and test sets"
+./xsplitData >& xsplitData.out
+echo "See file  xsplitData.out"
+
+# training 
+echo "training..."
+./xtrain >& xtrain.out
+echo "See file  xtrain.out"
+
+echo "Evaluation using best validation parameters on test data..."
+./xevaluator >& xevaluator.out
+echo "See file  xevaluator.out"
+
+# analizis
+echo "Analyzis : R2, MAE, plot, ..."
+./xanalyze >& xanalyze.out
+echo "See file  xanalysz.out and *.pdf files"

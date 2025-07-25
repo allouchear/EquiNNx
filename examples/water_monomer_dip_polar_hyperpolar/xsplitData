@@ -1,0 +1,8 @@
+#!/bin/bash
+
+source config.sh
+
+fh5='water_n_structures_1000_cutidx_None.h5'
+prefix='water'
+python $EQUINNX_TOOLS/splitData.py --input_file_name=$fh5 --seed=10 --train_size=-1 --test_size=0.2 --prefix=$prefix
+

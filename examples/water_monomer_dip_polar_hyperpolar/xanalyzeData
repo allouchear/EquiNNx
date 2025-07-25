@@ -1,0 +1,8 @@
+#!/bin/bash
+
+source config.sh
+
+fh5='water_n_structures_1000_cutidx_None.h5'
+prefix='water'
+python analyzeData.py --input_file_name=$fh5 --prefix=$prefix
+

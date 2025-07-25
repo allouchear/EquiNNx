@@ -1,0 +1,4 @@
+#!/bin/bash
+
+echo "see xall.out..."
+nohup ./xall >& xall.out &

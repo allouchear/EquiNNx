@@ -1,0 +1,8 @@
+#!/bin/bash
+
+source config.sh
+fn=$PWD/'md17_ethanol_n_structures_555092_cutidx_None_n_structures_111018_test.h5'
+list_models=$PWD/chk/validation/best
+fout='evaluation.npz'
+time python  $EQUINNX_SRC/evaluator.py --list_models=$list_models --dataset=$fn --batch_size=10 --verbose=1 --num_structures=100 --output_file_name=$fout --output_weights=1.0,1.0
+

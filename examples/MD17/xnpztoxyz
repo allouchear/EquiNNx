@@ -1,0 +1,8 @@
+#!/bin/bash
+
+source config.sh
+
+fnpz='md17_ethanol.npz'
+prefix='water'
+python npztoxyz.py --input_file_name=$fnpz 
+

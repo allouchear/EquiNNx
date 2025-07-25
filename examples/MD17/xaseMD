@@ -1,0 +1,13 @@
+#!/bin/bash
+source config.sh
+
+#export JAX_ENABLE_X64=True
+export JAX_ENABLE_X64=False
+
+#export JAX_ENABLE_X64=True
+#available mdType : "NVE" "LANGEVIN" "ANDERSEN" "NVTBERENDSEN" "NPTBERENDSEN" "NVTNOSEHOOVER" "NPTNOSEHOOVER"
+
+models="$PWD/chk/validation/best"
+molecule='molecule.xyz'
+time python $EQUINNX_TOOLS/aseMD.py --mdType=NVE --input_file_name=$molecule --output_traj_name=md.traj --verbose=0 --nmax=10000 --temperature=300  --list_models=$models --unit_models='kcal/mol,Ang' --external_stress=0.03 --print_nsteps=100 --tstep=0.1
+

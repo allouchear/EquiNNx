@@ -1,0 +1,6 @@
+#!/bin/bash
+
+source config.sh
+#export JAX_ENABLE_X64=True
+time python $EQUINNX_SRC/train.py train.inp
+

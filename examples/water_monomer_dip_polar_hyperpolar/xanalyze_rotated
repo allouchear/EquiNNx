@@ -1,0 +1,12 @@
+#!/bin/bash 
+
+source config.sh
+#export CUDA_VISIBLE_DEVICES='' # to force CPU use
+
+export DISPLAY='' # to avoid display figures. Figures saved in .pdf
+
+fnpz="evaluation_rotated.npz"
+prog=$EQUINNX_TOOLS/'analyze.py'
+fout='water'
+buildfigures=1
+python $prog $fnpz $fout $buildfigures

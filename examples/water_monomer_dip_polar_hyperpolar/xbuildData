@@ -1,0 +1,7 @@
+#!/bin/bash
+
+source config.sh
+fnxyz='coords_1000.xyz'
+prefix='water'
+python buildData.py --build_index=1 --save_xyz_with_index=1 --save_xyz_without_index=1 --cutoff=-1 --input_file_name=$fnxyz --prefix=$prefix
+
