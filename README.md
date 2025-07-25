@@ -2,7 +2,7 @@
 ==========================================================================================
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-This package integrates an equivariant neural network model to predict molecular and/or periodic systems. It can predict any tensor of rank ≤ 3, including scalars, vectors, matrices, and (3,3,3) tensors. It has been tested on the prediction of energy, forces, dipole moments, polarizability, and hyperpolarizability.
+This package integrates an equivariant neural network model to predict molecular and/or periodic systems properties. It can predict any tensor of rank ≤ 3, including scalars, vectors, matrices, and (3,3,3) tensors. It has been tested on the prediction of energy, forces, dipole moments, polarizability, and hyperpolarizability.
 
 ## Requirement
  - jax
