@@ -1,5 +1,5 @@
-# EquiNNx  An Equivariant neural network model to predict properties of molecules and periodic systems
-======================================================================================================
+# EquiNNx is An equivariant neural network model to predict properties of molecules and periodic systems
+========================================================================================================
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
@@ -15,6 +15,7 @@ pip install -U jax
 pip install -U "jax[cuda12]" 
 # If you have a TPU
 pip install -U "jax[tpu]"
+pip install --upgrade e3x
 pip install ase
 ```
 
