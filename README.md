@@ -36,22 +36,22 @@ See xbuildData script in examples directory.
 ### 2. train.py
 **Using the database created by buildData.py, make the training**\
 See train.inp and ./xtrain bash script in examples directory.
-See getArgments() function in [src/Utils/UtilsFunctions.py](https://github.com/allouchear/EquiNNx/blob/master/src/Utils/UtilsFunctions.py) to obtain all input parameters.
+You can obtain the list of input parameters from getArgments() function in [src/Utils/UtilsFunctions.py](https://github.com/allouchear/EquiNNx/blob/master/src/Utils/UtilsFunctions.py).
 
 ### 3. evaluation.py
 **Test the models (one or an ensemble of models) using a database**\
 See  xevaluation bash script in examples directory.
-See getArgments() function in [src/evaluator.py](https://github.com/allouchear/EquiNNx/blob/master/src/evaluator.py) to obtain all input parameters.
+You can obtain the list of input parameters from getArgments() function in [src/evaluator.py](https://github.com/allouchear/EquiNNx/blob/master/src/evaluator.py).
 
 ### 4. predict.py
 **Predict the properties using a .xyz (with multiple geometries) file**\
 See xpredict bash script in examples directory.
-See getArgments() function in [src/predict.py](https://github.com/allouchear/EquiNNx/blob/master/src/predict.py) to obtain all input parameters.
+You can obtain the list of input parameters from getArgments() function in [src/predict.py](https://github.com/allouchear/EquiNNx/blob/master/src/predict.py).
 
 ### 5. aseMD.py
 **Make Molecular dynamic with ase and EquiNNx using a .xyz or a POSCAR file**\
 see xaseMD bash script in examples directory.
-See getArgments() function in [tools/aseMD.py](https://github.com/allouchear/EquiNNx/blob/master/tools/aseMD.py) to obtain all input parameters.
+You can obtain the list of input parameters from getArgments() function in [tools/aseMD.py](https://github.com/allouchear/EquiNNx/blob/master/tools/aseMD.py).
 
 
 ## Examples
