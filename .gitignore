@@ -1,3 +1,7 @@
 __pycache__
 */__pycache__
 */*/__pycache__
+*/*.h5
+*/*/*.h5
+*/*.npz
+*/*/*.npz
