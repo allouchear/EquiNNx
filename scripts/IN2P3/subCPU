@@ -1,0 +1,95 @@
+#!/bin/bash
+###################################################################
+#                                                                 #
+#  Run EquiNNx in batch at in2p3                                  #
+#  Auteur:  A-R Allouche allouchear@univ-lyon1.fr                 #
+#  iLM, Villeurbanne                                              #
+#  May 2024                                                       #
+#                                                                 #
+###################################################################
+
+queue=$1 ; [ 0 = $# ] || shift
+np=$1 ; [ 0 = $# ] || shift
+filename=$1 ; [ 0 = $# ] || shift
+
+if [ -z "$filename" ]  || [ -z "$np" ] || [ -z "$queue" ] 
+then
+   clear
+   echo " " 
+   echo "==========================================="
+   echo "                 $0 "
+   echo "==========================================="
+   echo "     Queue         Duree    # CPU    Memoire"
+   echo "     =========     =====    ======   ======="
+   echo "     medium        5h       64 max   3Go/core"
+   echo "     long         30h       64 max   3Go/core"
+   echo "     long2        60h       64 max   3Go/core"
+   echo "     longlasting 168h       64 max   3Go/core"
+   echo "------------------------------------------------"
+   echo "Vous devez fournir :"
+   echo " - Le nom de la queue :"
+   echo " - Le nombre de gpu :"
+   echo " - Le nom du fichier xrun"
+   echo "-------------------------------------------"
+   echo "Exemple:"
+   echo "       $0 medium 8 xrun"
+   echo "==========================================="
+   echo " " 
+   exit 1
+fi
+
+[ $queue = "medium" ] && queue="mc_medium" && underqueue="mc_medium" && ncpu=$np && ttime=5:0:0 
+[ $queue = "long" ] && queue="mc_long" && underqueue="mc_long" && ncpu=$np && ttime=30:0:0 
+[ $queue = "long2" ] && queue="mc_long" && underqueue="mc_long" && ncpu=$np && ttime=60:0:0 
+[ $queue = "longlasting" ] && queue="mc_longlasting" && underqueue="mc_longlasting" && ncpu=$np && ttime=168:0:0
+DEFAULTDIR=`pwd`
+if test ! -s "$filename"
+then
+   echo " " 
+   echo "============================================"
+   echo "le fichier $filename est introuvable(ou vide)"
+   echo "============================================"
+   echo " " 
+   exit 2
+fi
+
+endof=EOF
+cat > $filename.sh <<EOF
+#!/bin/bash
+
+cd $DEFAULTDIR
+source $HOME/.bashrc
+
+time $filename > $filename.out
+
+#/bin/rm $filename.sh
+
+EOF
+
+mmem=$((3000*ncpu ))
+res=`sbatch --time=$ttime --mem=$mmem --output=$DEFAULTDIR/$filename.sout --error=$DEFAULTDIR/$filename.serr --nodes=1 --tasks=$ncpu  $filename.sh`
+
+#echo "res=$res"
+rr=0
+rr=`expr match "$res" '.*has been submitted*.'`
+
+
+if test ! $rr -eq 0
+then
+echo " " 
+echo "==================================================================="
+echo " " 
+echo "Un fichier $filename.sh a ete cree pour lancer le calcul"
+echo "Ne pas effacer ce fichier avant la fin du calcul"
+echo " " 
+echo "-------------------------------------------------------------------"
+echo " " 
+echo "pour avoir des informations sur vos job taper : squeue "
+echo " " 
+echo "pour detruire un job taper : scancel numjob"
+echo " " 
+echo "==================================================================="
+echo " " 
+fi
+
+

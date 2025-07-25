@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# chekc config.sh : can be change with linux system
+source config.sh
+
+export JAX_ENABLE_X64=True
+
+models="$PWD/chk/validation/best"
+molecule='molecule.xyz'
+python aseCalc.py --list_models=$models --input_file_name=$molecule --unit_models='kcal/mol,Ang'
+

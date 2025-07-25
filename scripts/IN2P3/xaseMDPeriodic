@@ -1,0 +1,13 @@
+#!/bin/bash
+source config.sh
+
+#export JAX_ENABLE_X64=True
+export JAX_ENABLE_X64=False
+
+#export JAX_ENABLE_X64=True
+#available mdType : "NVE" "LANGEVIN" "ANDERSEN" "NVTBERENDSEN" "NPTBERENDSEN" "NVTNOSEHOOVER" "NPTNOSEHOOVER"
+
+models="$PWD/chk/validation/best"
+system='system.xyz'
+time python $EQUINNX_TOOLS/aseMD.py --mdType=NPTNOSEHOOVER --input_file_name=$system --output_traj_name=md.traj --verbose=0 --nmax=1000 --temperature=300  --list_models=$models --unit_models='Hartree,Bohr' --external_stress=0.03 --print_nsteps=100 --tstep=0.1
+

@@ -1,0 +1,1 @@
+srun --mem=10000 --nodes=1 --tasks=10 -t 0-05:00 --pty bash

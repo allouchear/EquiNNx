@@ -1,0 +1,16 @@
+#!/bin/bash
+
+cdir=${PWD%/*}
+sdir=${cdir%/*}
+fconfig=config.sh
+echo export EQUINNX_DIR=$sdir > $fconfig
+echo export EQUINNX_SRC=\$EQUINNX_DIR/src >> $fconfig
+echo export EQUINNX_TOOLS=\$EQUINNX_DIR/tools >> $fconfig
+echo export EQUINNX_SCRIPTS=\$EQUINNX_DIR/scripts/IN2P3 >> $fconfig
+echo export PYTHONPATH=\$PYTHONPATH:\$EQUINNX_SRC >> $fconfig
+echo export PATH=\$PATH:\$EQUINNX_SRC >> $fconfig
+echo export PATH=\$PATH:\$EQUINNX_SCRIPTS >> $fconfig
+echo source \$EQUINNX_SCRIPTS/env.sh >> $fconfig
+cat $fconfig
+echo "see $fconfig file"
+

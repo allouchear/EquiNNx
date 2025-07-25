@@ -1,0 +1,9 @@
+#!/bin/bash
+
+source config.sh
+
+fh5='water_n_structures_120000_train.h5'
+fh5='water_n_structures_30000_test.h5'
+prefix='water'
+python $EQUINNX_TOOLS/checkData.py --input_file_name=$fh5 --prefix=$prefix --c_size=4.5 --remove_outliers=1
+

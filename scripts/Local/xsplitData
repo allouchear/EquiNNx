@@ -1,0 +1,8 @@
+#!/bin/bash
+
+source config.sh
+
+fh5='waters_nMols150000_with_index_cutMol8_cutidx5.h5'
+prefix='water'
+python $EQUINNX_TOOLS/splitData.py --input_file_name=$fh5 --seed=-1 --train_size=1000 --test_size=200 --prefix=$prefix
+

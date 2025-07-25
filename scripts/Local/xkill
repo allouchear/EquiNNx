@@ -1,0 +1,22 @@
+#!/bin/bash
+
+lx=$(ps -u $USER | grep xtrain | awk '{printf("%s ",$1)}')
+lp=$(ps -u $USER | grep python | awk '{printf("%s ",$1)}')
+
+if [ -z $lx ]
+then
+	echo "no xtran"
+else
+	echo $lx
+	kill -9 $lx
+fi
+
+arr=($lp)
+
+if [ -z $arr[0] ]
+then
+	echo "no python"
+else
+	echo $lp
+	kill -9 $lp
+fi

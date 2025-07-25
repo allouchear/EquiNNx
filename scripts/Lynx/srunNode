@@ -1,0 +1,3 @@
+#srun --mem=10000 -Atc5 -p  tc5 --nodes=1 -n 10 --time=10000:0:0 --pty bash
+#srun --mem=10000 -A theochem -p  f24 --nodes=1 -n 10 --time=10000:0:0 --pty bash
+srun -p  cl24 --nodes=1 -n 10 --time=10000:0:0 --pty bash

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# chekc config.sh : can be change with linux system
+source config.sh
+
+#export JAX_ENABLE_X64=True
+export JAX_ENABLE_X64=False
+
+models="$PWD/chk/validation/best"
+system='system.xyz'
+time python $EQUINNX_TOOLS/aseCalc.py --list_models=$models --input_file_name=$system --unit_models='Hartree,Bohr'
+

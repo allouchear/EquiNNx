@@ -1,0 +1,8 @@
+export EQUINNX_DIR=/sps/ilm/allouche/MySoftwares/EquiNNx-Polar-v2p0
+export EQUINNX_SRC=$EQUINNX_DIR/src
+export EQUINNX_TOOLS=$EQUINNX_DIR/tools
+export EQUINNX_SCRIPTS=$EQUINNX_DIR/scripts/IN2P3
+export PYTHONPATH=$PYTHONPATH:$EQUINNX_SRC
+export PATH=$PATH:$EQUINNX_SRC
+export PATH=$PATH:$EQUINNX_SCRIPTS
+source $EQUINNX_SCRIPTS/env.sh

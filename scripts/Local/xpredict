@@ -1,0 +1,9 @@
+#!/bin/bash
+
+source config.sh
+fn=$PWD/'water_monomer_n_structures_200_test.h5'
+list_models=$PWD/train_chk/validation/best
+fxyz='mols.xyz'
+
+time python $EQUINNX_CODEDIR/tools/predict.py --list_models=$list_models --input_file_name=$fxyz --verbose=1 --seed=0
+
