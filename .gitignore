@@ -5,3 +5,7 @@ __pycache__
 */*/*.h5
 */*.npz
 */*/*.npz
+
+# JZ related data
+**-jz.sh
+**/Jean-Zay
