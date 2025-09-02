@@ -1,0 +1,19 @@
+[project]
+name = "equinnx"
+version = "0.1.0"
+description = "EquiNNx is an equivariant neural network model designed for molecules and periodic systems"
+authors = [
+  { name = "Abdulrahman Allouche", email = "abdul-rahman.allouche@univ-lyon1.fr" },
+]
+maintainers = [
+  { name = "Abdulrahman Allouche", email = "abdul-rahman.allouche@univ-lyon1.fr" },
+  { name = "Dylan Bissuel", email = "dylan.bissuel@univ-lyon1.fr" },
+]
+readme = "README.md"
+license = "GPL-3.0-or-later"
+requires-python = ">=3.9"
+dependencies = [
+    "ase>=3.26.0",
+    "e3x>=1.0.2",
+    "jax[cuda12]>=0.4.30",
+]
