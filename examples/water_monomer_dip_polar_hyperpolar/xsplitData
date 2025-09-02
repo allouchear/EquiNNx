@@ -1,6 +1,7 @@
 #!/bin/bash
 
-source config.sh
+#source config.sh
+source config-jz.sh
 
 fh5='water_n_structures_1000_cutidx_None.h5'
 prefix='water'
