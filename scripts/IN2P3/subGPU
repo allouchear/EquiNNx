@@ -1,7 +1,6 @@
 #!/bin/bash
 ###################################################################
 #                                                                 #
-#  Run NNMP-STM in batch at in2p3                                 #
 #  Auteur:  A-R Allouche allouchear@univ-lyon1.fr                 #
 #  iLM, Villeurbanne                                              #
 #  May 2022                                                       #
@@ -67,8 +66,8 @@ time $filename > $filename.out
 EOF
 
 mmem=$((3000*ngpu ))
-mmem=0
-res=`sbatch --gres=gpu:v100:$ngpu --time=$ttime --mem=$mmem --output=$DEFAULTDIR/$filename.sout --error=$DEFAULTDIR/$filename.serr $filename.sh`
+mmem=10G
+res=`sbatch -p gpu_v100 --gpus $ngpu  -L sps --account=ilm  --time=$ttime --mem=$mmem --output=$DEFAULTDIR/$filename.sout --error=$DEFAULTDIR/$filename.serr $filename.sh`
 
 #echo "res=$res"
 rr=0

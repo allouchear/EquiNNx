@@ -1,4 +1,4 @@
-export EQUINNX_DIR=/sps/ilm/allouche/MySoftwares/EquiNNx-Polar-v2p0
+export EQUINNX_DIR=/sps/ilm/allouche/MySoftwares/EquiNNx
 export EQUINNX_SRC=$EQUINNX_DIR/src
 export EQUINNX_TOOLS=$EQUINNX_DIR/tools
 export EQUINNX_SCRIPTS=$EQUINNX_DIR/scripts/IN2P3

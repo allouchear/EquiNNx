@@ -1,3 +1,2 @@
 #!/bin/bash
-ngpu=1
-srun -t 30:0:0 -n4 --mem 10G  -pgpu --gres=gpu:h100:$ngpu --pty bash -i 
+srun -t 30:0:0 -p gpu_v100_interactive --gpus 1  -L sps --account=ilm  --mem=10G  --pty bash -i
