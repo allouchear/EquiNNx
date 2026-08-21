@@ -1,0 +1,8 @@
+#!/bin/bash
+
+source config-jax.sh
+
+/bin/rm -r chk
+
+/usr/bin/time -v python $EQUINNX_SRC/train.py trainBatching.inp 
+

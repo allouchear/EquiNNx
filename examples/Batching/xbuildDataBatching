@@ -1,0 +1,9 @@
+#!/bin/bash
+
+source config.sh
+
+export CUDA_VISIBLE_DEVICES=""
+fh5='water_n_structures_800_train.h5'
+prefix='water'
+python $EQUINNX_SRC/buildDataBatching.py --dataset=$fh5 --seed=10 --num_train=600 --num_valid=200 --batch_size=10 --num_workers=4 --save_data=1 --bins=1
+

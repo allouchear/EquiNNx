@@ -14,7 +14,3 @@ conda activate jax
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/sps/ilm/allouche/Softwares/anaconda3-2023/lib
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/sps/ilm/allouche/Softwares/anaconda3-2023/envs/jax/lib
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/sps/ilm/allouche/Softwares/anaconda3-2023/envs/jax/lib/python3.10/site-packages/tensorrt_bindings
-export NNMP_POLAR_CODEDIR=/sps/ilm/allouche/MySoftwares/NNMP-STM-16-Code
-export PYTHONPATH=$PYTHONPATH:$NNMP_POLAR_CODEDIR
-export PATH=$PATH:$NNMP_POLAR_CODEDIR
-export PATH=$PATH:$NNMP_POLAR_CODEDIR/scripts

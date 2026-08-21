@@ -42,7 +42,9 @@ def getArguments():
 	#define command line arguments
 	parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
 	parser.add_argument('--list_models', type=str, nargs='+', help="List of directory containing fitted models (at least one file), ....")
-	parser.add_argument('--dataset', default="mols.h5", type=str, help="Data with index in h5 format. See buildData.py")
+	parser.add_argument('--dataset', default="mols.h5", type=str, help="Data with index in h5 format. See buildData.py. If it is a pre-built batching h5 file (built by buildDataBatching.py), the evaluation is done on its TRAIN part without reading the raw dataset")
+	parser.add_argument("--data_loading", type=str, default='ram', choices=['ram','disk'],  help="only for a pre-built batching dataset : ram => load all batches in memory at startup (default) ; disk => read batches on demand from the batching file (low RAM, disk I/O per batch per epoch)")
+	parser.add_argument("--data_cache", type=int, default=4,  help="only for a pre-built batching dataset with --data_loading=disk : number of batches kept in an LRU cache (-1 = keep all batches after the first pass). Default=4")
 	parser.add_argument('--batch_size', default=1, type=int, help="Batch size. Default =1")
 	parser.add_argument('--num_structures', default=-1, type=int, help="Number of values to take in the data file. Default = -1=> all structures")
 	parser.add_argument("--output_weights", default=None, type=str, help="Weights for output properties.  with the same order than output_types. (default=1.0 for each one)")

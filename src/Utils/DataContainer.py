@@ -1,6 +1,7 @@
 import sys
 import jax
 import jax.numpy as jnp
+import numpy as np
 from ase.io import read
 from Utils.UtilsFunctions import *
 from Utils.PeriodicTable import *
@@ -9,6 +10,92 @@ from ase import Atoms
 from ase.neighborlist import neighbor_list
 import h5py
 import warnings
+
+KEYS = [
+	'ID','N','Z','R','forces','masses', 'energy', 'energybyatom', 'totalcharge','spinmultiplicity', 'efield',
+	'offsets','n_idx','dst_idx','src_idx',
+	'edipole', 'polarizability', 'hyperpolarizability',
+	'sdipole','alfa','beta'
+]
+
+def build_batch(container, idx, keys, n_embeded_atoms):
+	"""Build a padded-free batch dict from a container (dict of arrays indexed by molecule).
+
+	Pure function extracted from DataContainer.__getitem__ so that both the in-memory
+	path and buildDataBatching produce bit-identical batches.
+	"""
+	if type(idx) is int or type(idx) is np.int64:
+		idx = [idx]
+	data = {}
+	for key in keys:
+		data[key] = []
+	data['batch_seg'] = []
+
+	Ntot = 0 #total number of atoms
+	for k, i in enumerate(idx):
+		N = int(container['N'][i]) #number of atoms
+		for key in keys:
+			if key=='efield' and container[key] is not None:
+				M = np.tile(container[key][i], (N, 1))
+				if len(data['efield'])==0:
+					data['efield'] = M
+				else:
+					data['efield'] = np.vstack((data['efield'], M))
+			elif key=='cells' and container[key] is not None:
+				data[key].extend(container[key][i:i+1,:,:].tolist())
+			elif key in ['Z','masses'] and container[key] is not None:
+				data[key].extend(container[key][i,:N].tolist())
+			elif key in ['R','forces'] and container[key] is not None:
+				data[key].extend(container[key][i,:N,:].tolist())
+			elif key in ['dst_idx','src_idx'] and container[key] is not None and len(container[key])==len(container['Z']):
+				data[key].extend(np.reshape(container[key][i]+Ntot,[-1]).tolist())
+			elif key in ['totalcharge','spinmultiplicity'] and container[key] is not None:
+				data[key].extend([container[key][i]]*N)
+			elif key=='offsets' and container[key] is not None and container['dst_idx']  and len(container['dst_idx'])==len(container['Z']):
+				data['offsets'].extend(container[key][i].tolist())
+			elif container[key] is not None:
+				data[key].append(container[key][i])
+
+		skeys = ['energybyatom', 'energy']
+		for key in skeys:
+			if key in keys and container[key] is None: 
+				data[key].extend([(np.nan)])
+		skeys = ['spinmultiplicity', 'masses']
+		for key in skeys:
+			if key in keys and container[key] is None: 
+				data[key].extend([1.0]*N)
+		key = 'totalcharge'
+		if key in keys and container[key] is None: 
+			data[key].extend([0.0]*N)
+		key = 'ID'
+		if key in keys and container[key] is None: 
+			data[key].append(i+1)
+		key = 'Z'
+		if key in keys and container[key] is None: 
+			data[key].append(0)
+
+		if len(container['dst_idx'])!=len(container['Z']): 
+			data['dst_idx'].extend(np.reshape(container['dst_idx'][:N,:N-1]+Ntot,[-1]).tolist())
+			data['src_idx'].extend(np.reshape(container['src_idx'] [:N,:N-1]+Ntot,[-1]).tolist())
+			data['offsets']=[]
+		#offsets could be added in case they are need
+		#data['batch_seg'].extend([k]*N)
+		if n_embeded_atoms<=0 or n_embeded_atoms>=N:
+			data['batch_seg'].extend([2*k]*N)
+		else:
+			data['batch_seg'].extend([2*k]*n_embeded_atoms)
+			data['batch_seg'].extend([2*k+1]*(N-n_embeded_atoms))
+		#increment totals
+		Ntot += N
+
+	listform =['batch_seg','N']
+	for key in keys:
+		if key not in listform:
+			if data[key] is not None and len(data[key])>0:
+				data[key] = jnp.asarray(data[key])
+			else:
+				data[key] = None
+	return data
 
 def saveDatah5(data, filename):
 	with h5py.File(filename, "w") as h5file:
@@ -102,12 +189,7 @@ class DataContainer:
 
 		self._container = {}
 
-		self._keys = [
-			'ID','N','Z','R','forces','masses', 'energy', 'energybyatom', 'totalcharge','spinmultiplicity', 'efield',
-			'offsets','n_idx','dst_idx','src_idx',
-			'edipole', 'polarizability', 'hyperpolarizability',
-			'sdipole','alfa','beta'
-		]
+		self._keys = KEYS
 		for key in self._keys:
 			if key in data and data[key] is not None: 
 				self._container[key] = data[key][idx]
@@ -211,81 +293,5 @@ class DataContainer:
 		return self._container['Z'].shape[0]
 
 	def __getitem__(self, idx):
-		if type(idx) is int or type(idx) is np.int64:
-			idx = [idx]
-		data = {}
-		keys =  self._keys
-		for key in keys:
-			data[key] = []
-		data['batch_seg'] = []
-
-		Ntot = 0 #total number of atoms
-		for k, i in enumerate(idx):
-			N = int(self._container['N'][i]) #number of atoms
-			for key in keys:
-				if key=='efield' and self._container[key] is not None:
-					M = np.tile(self._container[key][i], (N, 1))
-					if len(data['efield'])==0:
-						data['efield'] = M
-					else:
-						data['efield'] = np.vstack((data['efield'], M))
-				elif key=='cells' and self._container[key] is not None:
-					data[key].extend(self._container[key][i:i+1,:,:].tolist())
-				elif key in ['Z','masses'] and self._container[key] is not None:
-					data[key].extend(self._container[key][i,:N].tolist())
-				elif key in ['R','forces'] and self._container[key] is not None:
-					data[key].extend(self._container[key][i,:N,:].tolist())
-				elif key in ['dst_idx','src_idx'] and self._container[key] is not None and len(self._container[key])==len(self._container['Z']):
-					data[key].extend(np.reshape(self._container[key][i]+Ntot,[-1]).tolist())
-				elif key in ['totalcharge','spinmultiplicity'] and self._container[key] is not None:
-					data[key].extend([self._container[key][i]]*N)
-				elif key=='offsets' and self._container[key] is not None and self._container['dst_idx']  and len(self._container['dst_idx'])==len(self._container['Z']):
-					data['offsets'].extend(self._container[key][i].tolist())
-				elif self._container[key] is not None:
-					data[key].append(self._container[key][i])
-
-			skeys = ['energybyatom', 'energy']
-			for key in skeys:
-				if key in keys and self._container[key] is None: 
-					data[key].extend([(np.nan)])
-			skeys = ['spinmultiplicity', 'masses']
-			for key in skeys:
-				if key in keys and self._container[key] is None: 
-					data[key].extend([1.0]*N)
-			key = 'totalcharge'
-			if key in keys and self._container[key] is None: 
-				data[key].extend([0.0]*N)
-			key = 'ID'
-			if key in keys and self._container[key] is None: 
-				data[key].append(i+1)
-			key = 'Z'
-			if key in keys and self._container[key] is None: 
-				data[key].append(0)
-
-			if len(self._container['dst_idx'])!=len(self._container['Z']): 
-				data['dst_idx'].extend(np.reshape(self._container['dst_idx'][:N,:N-1]+Ntot,[-1]).tolist())
-				data['src_idx'].extend(np.reshape(self._container['src_idx'] [:N,:N-1]+Ntot,[-1]).tolist())
-				data['offsets']=[]
-			#offsets could be added in case they are need
-			#data['batch_seg'].extend([k]*N)
-			if self._n_embeded_atoms<=0 or self._n_embeded_atoms>=N:
-				data['batch_seg'].extend([2*k]*N)
-			else:
-				data['batch_seg'].extend([2*k]*self._n_embeded_atoms)
-				data['batch_seg'].extend([2*k+1]*(N-self._n_embeded_atoms))
-			#increment totals
-			Ntot += N
-
-		listform =['batch_seg','N']
-		for key in keys:
-			if key not in listform:
-				if data[key] is not None and len(data[key])>0:
-					data[key] = jnp.asarray(data[key])
-				else:
-					data[key] = None
-		#if data['dst_idx']  is None:
-		#	data['dst_idx'] =[]
-		#if data['R']  is None:
-		#	data['R'] =[]
-		return data
+		return build_batch(self._container, idx, self._keys, self._n_embeded_atoms)
 

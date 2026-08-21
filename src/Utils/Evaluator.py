@@ -164,11 +164,20 @@ class Evaluator:
 		configModel=self._models[0].get_config()
 		config.n_embeded_atoms=configModel['n_embeded_atoms']
 		config.verbose=config.verbose
-		data=DataContainer(config)
-		dataProvider = DataProvider(data, config)
-		size=len(data)
-		if config.batch_size > size:
-			config.batch_size=size
+		batching_file = config.dataset if is_batching_file(config.dataset) else None
+		if batching_file is not None:
+			# The dataset is a pre-built batching file : evaluate on its TRAIN part,
+			# no raw dataset read. The split/batching parameters are read from the file
+			# and override the config.
+			if config.verbose>0:
+				print("Evaluating on the train part of the batching file : ", batching_file, flush=True)
+			dataProvider = DataProvider(None, config, batching_file=batching_file, memory_mode=config.data_loading, cache_size=config.data_cache)
+		else:
+			data=DataContainer(config)
+			dataProvider = DataProvider(data, config)
+			size=len(data)
+			if config.batch_size > size:
+				config.batch_size=size
 		weights = config.output_weights
 		print_weights(weights)
 

@@ -7,6 +7,7 @@ import random
 from datetime import datetime
 import numpy  as np
 import logging
+import h5py
 from flax.training import orbax_utils
 import orbax.checkpoint
 from Model.Model import *
@@ -93,11 +94,25 @@ def checkArguments(args):
 	
 		
 
+def is_batching_file(filename):
+	"""Return True if the given h5 file is a pre-built batching file (written by
+	buildDataBatching.py), identified by the presence of the 'num_train' root attribute.
+	Raw dataset files (buildData format) have no root attributes."""
+	if filename is None:
+		return False
+	if not os.path.exists(filename):
+		raise ValueError("File {} does not exist".format(filename))
+	with h5py.File(filename, "r") as f:
+		return "num_train" in f.attrs
+
+
 def getArguments():
 	#define command line arguments
 	parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
 	parser.add_argument("--restart", type=str, default='train',  help="restart training from a specific folder")
-	parser.add_argument("--dataset", type=str,   help="file name of the dataset (including path)")
+	parser.add_argument("--dataset", type=str,   help="file name of the dataset (including path). If it is a pre-built batching h5 file (written by buildDataBatching.py), the pre-built batches are used ; otherwise the raw data is read and the batches are built in memory")
+	parser.add_argument("--data_loading", type=str, default='ram', choices=['ram','disk'],  help="only for a pre-built batching dataset : ram => load all batches in memory at startup (default) ; disk => read batches on demand from the batching file (low RAM, disk I/O per batch per epoch)")
+	parser.add_argument("--data_cache", type=int, default=4,  help="only for a pre-built batching dataset with --data_loading=disk : number of batches kept in an LRU cache (-1 = keep all batches after the first epoch). Default=4")
 	parser.add_argument("--num_features", type=int,   help="dimensionality of feature vectors")
 	parser.add_argument("--seed", default=42, type=int,   help="seed for splitting dataset into training/validation/test")
 	parser.add_argument("--num_epochs", type=int,   help="maximum number of epocs")

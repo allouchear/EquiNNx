@@ -31,26 +31,33 @@ You can also download the .zip file of EquiNNx : Click on Code and Download ZIP
 ## Main programs
 ### 1. buildData.py
 **Build data for training.**\
-See xbuildData script in examples directory.
+See xbuildData script in the examples directory.
+
+### 1A. buildDataBatching.py
+**Build batched data for training.**\
+See the xbuildDataBatching script in the examples/Batching directory.
+This step is not mandatory,**but it is highly recommended for large datasets**.
 
 ### 2. train.py
 **Using the database created by buildData.py, make the training**\
-See train.inp and ./xtrain bash script in examples directory.
+See train.inp and ./xtrain bash script in the examples directory.
 You can obtain the list of input parameters from getArgments() function in [src/Utils/UtilsFunctions.py](https://github.com/allouchear/EquiNNx/blob/master/src/Utils/UtilsFunctions.py).
+train.py can read dataset file created by buildData.py or by buildDataBatching.py. 
 
 ### 3. evaluation.py
 **Test the models (one or an ensemble of models) using a database**\
-See  xevaluation bash script in examples directory.
+See  xevaluation bash script in the examples directory.
 You can obtain the list of input parameters from getArgments() function in [src/evaluator.py](https://github.com/allouchear/EquiNNx/blob/master/src/evaluator.py).
+evaluation.py can read dataset file created by buildData.py or by buildDataBatching.py. 
 
 ### 4. predict.py
 **Predict the properties using a .xyz (with multiple geometries) file**\
-See xpredict bash script in examples directory.
+See xpredict bash script in the examples directory.
 You can obtain the list of input parameters from getArgments() function in [src/predict.py](https://github.com/allouchear/EquiNNx/blob/master/src/predict.py).
 
 ### 5. aseMD.py
 **Make Molecular dynamic with ase and EquiNNx using a .xyz or a POSCAR file**\
-see xaseMD bash script in examples directory.
+see xaseMD bash script in the examples directory.
 You can obtain the list of input parameters from getArgments() function in [tools/aseMD.py](https://github.com/allouchear/EquiNNx/blob/master/tools/aseMD.py).
 
 

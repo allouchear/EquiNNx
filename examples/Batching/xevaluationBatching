@@ -1,0 +1,9 @@
+#!/bin/bash
+
+source config-jax.sh
+
+fn=$PWD/'evaluation_batched_10_200_0_0_10.h5'
+list_models=$PWD/chk/validation/best
+fout='evaluation2.npz'
+time python  $EQUINNX_SRC/evaluator.py --list_models=$list_models --dataset=$fn --batch_size=10 --verbose=1 --num_structures=-1 --output_file_name=$fout --loss_type=r2mean
+
