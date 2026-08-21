@@ -1,3 +1,0 @@
-#!/bin/bash
-ngpu=1
-srun -t 30:0:0 -n4 --mem 10G  -pgpu --gres=gpu:h100:$ngpu --pty bash -i 
