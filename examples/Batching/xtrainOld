@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source config-jax.sh
+source config.sh
 
 /bin/rm -r chk
 

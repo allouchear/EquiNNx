@@ -10,14 +10,11 @@ import jax.numpy as jnp
 import numpy as np
 import optax
 import sys
-from pympler import tracker
-from pympler import muppy
-import psutil
-from pympler import asizeof
 import logging
 from Utils.UtilsFunctions import *
 from Utils.DataContainer import *
 from Utils.DataProvider import *
+from Utils.ValueAccumulator import ValueAccumulator
 #from memory_profiler import profile
 
 def add_mae(mae, pmae, i):
@@ -186,13 +183,13 @@ class Evaluator:
 		nchartrain = ncharall/n_batches
 		ndigits=len(str(n_batches))
 
-		all_values = None
+		all_accum = ValueAccumulator()
 		all_mae = None
 		all_loss = 0.0
 		for i in range(len(self._models)):
 			mae = None
 			loss = 0.0
-			values = None
+			model_accum = ValueAccumulator()
 			keys = None
 			dataProvider.reset_train_batch()
 			if config.verbose>0:
@@ -212,8 +209,9 @@ class Evaluator:
 					ieq=int((j+1)*nchartrain)
 					isp=abs(ncharall-ieq)
 					print("{:{width}d}/{:{width}d} [{}{}] loss={:0.8f}".format(j+1,n_batches, "="*ieq, " "*isp, loss, width=ndigits),end="\r",flush=True)
-				values = add_values(values, r, data)
+				model_accum.add_batch(r, data)
 				keys=list(r.keys())
+				del r
 			if config.verbose>0:
 				print("")
 			all_loss += (loss - all_loss)/(i+1)
@@ -221,12 +219,17 @@ class Evaluator:
 			print("Model # {} : {}/{} loss={:0.3f}".format(i+1, i+1, len(self._models), loss),flush=True)
 			print("All Models # 1-{} : loss={:0.3f}".format(i+1, all_loss),flush=True)
 			if i == 0:
-				all_values  = values
+				all_accum = model_accum
 			else:
+				model_dict = model_accum.to_dict()
+				all_dict = all_accum.to_dict()
 				for key in keys:
-					all_values[key+'_predict'] +=  (values[key+'_predict']-all_values[key+'_predict'])/(j+1)
-		self._results = all_values
-		return all_values
+					all_dict[key+'_predict'] = all_dict[key+'_predict'] + (model_dict[key+'_predict'] - all_dict[key+'_predict']) / (i + 1)
+				all_accum = ValueAccumulator()
+				# Re-fill all_accum from the averaged dict
+				all_accum._lists = {k: [v] for k, v in all_dict.items()}
+		self._results = all_accum.to_dict()
+		return self._results
 
 	def __call__(self, config):
 		return self.get_properties(config)

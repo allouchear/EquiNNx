@@ -89,10 +89,14 @@ def build_batch(container, idx, keys, n_embeded_atoms):
 		Ntot += N
 
 	listform =['batch_seg','N']
+	intkeys =['dst_idx','src_idx','ID','Z']
 	for key in keys:
 		if key not in listform:
 			if data[key] is not None and len(data[key])>0:
-				data[key] = jnp.asarray(data[key])
+				if key in intkeys:
+					data[key] = np.asarray(data[key], dtype=np.int64)
+				else:
+					data[key] = np.asarray(data[key], dtype=np.float64)
 			else:
 				data[key] = None
 	return data
@@ -184,8 +188,7 @@ class DataContainer:
 		else:
 			idx = np.arange(ns)
 
-		idx = idx.tolist()
-		idx = jnp.asarray(idx)
+		idx = np.asarray(idx)
 
 		self._container = {}
 
@@ -196,9 +199,9 @@ class DataContainer:
 			else:
 				self._container[key] = None
 		if self._container['totalcharge'] is None:
-			self._container['totalcharge'] = jnp.asarray([0.0]*len(idx))
+			self._container['totalcharge'] = np.asarray([0.0]*len(idx))
 		if self._container['spinmultiplicity'] is None:
-			self._container['spinmultiplicity'] = jnp.asarray([1.0]*len(idx))
+			self._container['spinmultiplicity'] = np.asarray([1.0]*len(idx))
 		if self._container['energy'] is None:
 			self._container['energybyatom']
 		else:
@@ -207,10 +210,10 @@ class DataContainer:
 		if self._container['energy'] is not None : 
 			meane=np.mean(self._container['energy'])
 			print("-"*60)
-			print("mean/energy        =", jnp.mean(jnp.asarray(self._container['energy'])))
-			print("std/energy         = ",jnp.std(jnp.asarray(self._container['energy'])))
-			print("mean/energybyatom  =", jnp.mean(jnp.asarray(self._container['energybyatom'])))
-			print("std/energybyatom   = ",jnp.std(jnp.asarray(self._container['energybyatom'])))
+			print("mean/energy        =", np.mean(self._container['energy']))
+			print("std/energy         = ",np.std(self._container['energy']))
+			print("mean/energybyatom  =", np.mean(self._container['energybyatom']))
+			print("std/energybyatom   = ",np.std(self._container['energybyatom']))
 			print("-"*60)
 
 		if self._container['forces'] is not None: 
@@ -234,7 +237,7 @@ class DataContainer:
 				if nrest>0:
 					mMol.extend([1.0]*nrest)
 				masses.append(mMol)
-			self._container['masses'] = jnp.asarray(masses)
+			self._container['masses'] = np.asarray(masses)
 
 		if self._container['offsets'] is not None:
 			self._container['offsets']=0 # to be take into account in build_idx_format

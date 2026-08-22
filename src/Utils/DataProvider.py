@@ -18,12 +18,12 @@ def add_padding(data, maxidx, maxlen, verbose=0):
 	else:
 		ldata=0
 	if ldata>0 and maxlen>ldata:
-		pad=jnp.asarray([maxidx+1]*(maxlen-ldata))
-		data['dst_idx']=jnp.concatenate([data['dst_idx'], pad])
-		data['src_idx']=jnp.concatenate([data['src_idx'], pad])
-		pad= jnp.asarray([0]*3*(maxlen-ldata)).reshape(-1,3)
+		pad=np.asarray([maxidx+1]*(maxlen-ldata))
+		data['dst_idx']=np.concatenate([data['dst_idx'], pad])
+		data['src_idx']=np.concatenate([data['src_idx'], pad])
+		pad= np.asarray([0]*3*(maxlen-ldata)).reshape(-1,3)
 		if data['offsets'] is not None:
-			data['offsets']=jnp.concatenate([data['offsets'], pad])
+			data['offsets']=np.concatenate([data['offsets'], pad])
 
 
 def add_ghost_atoms(data, maxnatoms, verbose=0):
@@ -34,22 +34,22 @@ def add_ghost_atoms(data, maxnatoms, verbose=0):
 	else:
 		ldata=0
 	if ldata>0 and maxnatoms>ldata:
-		pad = jnp.asarray([0]*3*(maxnatoms-ldata)).reshape(-1,3)
-		data['R'] = jnp.concatenate([data['R'], pad])
-		pad = jnp.asarray([data['Z'][0]]*(maxnatoms-ldata)).reshape(-1)
-		data['Z'] = jnp.concatenate([data['Z'], pad])
+		pad = np.asarray([0]*3*(maxnatoms-ldata)).reshape(-1,3)
+		data['R'] = np.concatenate([data['R'], pad])
+		pad = np.asarray([data['Z'][0]]*(maxnatoms-ldata)).reshape(-1)
+		data['Z'] = np.concatenate([data['Z'], pad])
 		if data['efield'] is not None:
-			pad = jnp.asarray([0]*3*(maxnatoms-ldata)).reshape(-1,3)
-			data['efield'] = jnp.concatenate([data['efield'], pad])
+			pad = np.asarray([0]*3*(maxnatoms-ldata)).reshape(-1,3)
+			data['efield'] = np.concatenate([data['efield'], pad])
 		if data['forces'] is not None:
-			pad = jnp.asarray([0]*3*(maxnatoms-ldata)).reshape(-1,3)
-			data['forces'] = jnp.concatenate([data['forces'], pad])
-		pad = jnp.asarray([data['totalcharge'][0]]*(maxnatoms-ldata)).reshape(-1)
-		data['totalcharge'] = jnp.concatenate([data['totalcharge'], pad])
-		pad = jnp.asarray([data['spinmultiplicity'][1]]*(maxnatoms-ldata)).reshape(-1)
-		data['spinmultiplicity'] = jnp.concatenate([data['spinmultiplicity'], pad])
-		pad = jnp.asarray([data['masses'][1]]*(maxnatoms-ldata)).reshape(-1)
-		data['masses'] = jnp.concatenate([data['masses'], pad])
+			pad = np.asarray([0]*3*(maxnatoms-ldata)).reshape(-1,3)
+			data['forces'] = np.concatenate([data['forces'], pad])
+		pad = np.asarray([data['totalcharge'][0]]*(maxnatoms-ldata)).reshape(-1)
+		data['totalcharge'] = np.concatenate([data['totalcharge'], pad])
+		pad = np.asarray([data['spinmultiplicity'][1]]*(maxnatoms-ldata)).reshape(-1)
+		data['spinmultiplicity'] = np.concatenate([data['spinmultiplicity'], pad])
+		pad = np.asarray([data['masses'][1]]*(maxnatoms-ldata)).reshape(-1)
+		data['masses'] = np.concatenate([data['masses'], pad])
 
 		data['batch_seg'] = data['batch_seg']+[1]*(maxnatoms-ldata)
 
@@ -472,8 +472,8 @@ class DataProvider:
 				print(i,'/',n, end='\r',flush=True)
 			i += 1
 			if data['dst_idx'] is not None and len(data['dst_idx'])>0:
-				maxidx=max(jnp.max(data['dst_idx']), maxidx)
-				maxidx=max(jnp.max(data['src_idx']), maxidx)
+				maxidx=max(np.max(data['dst_idx']), maxidx)
+				maxidx=max(np.max(data['src_idx']), maxidx)
 		return maxidx
 
 

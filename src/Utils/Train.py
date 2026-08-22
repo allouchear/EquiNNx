@@ -8,12 +8,9 @@ import jax.numpy as jnp
 import numpy as np
 import optax
 import sys
-from pympler import tracker
-from pympler import muppy
-import psutil
-from pympler import asizeof
 import logging
 from Utils.UtilsFunctions import *
+from Utils.ValueAccumulator import ValueAccumulator
 from flax.training.train_state import TrainState
 #from memory_profiler import profile
 from optax import contrib
@@ -556,7 +553,7 @@ def train_model(key, model, restored, dataProvider, config,  outputConfig):
 		# Loop over train batches.
 		train_loss = 0.0
 		train_mae = None
-		train_values = None
+		train_accum = ValueAccumulator()
 		dataProvider.reset_train_batch()
 		dataProvider.reset_valid_batch()
 
@@ -577,7 +574,8 @@ def train_model(key, model, restored, dataProvider, config,  outputConfig):
 			isp=abs(ncharall-ieq)
 			if config.verbose>0:
 				print("Train : {:{width}d}/{:{width}d} [{}{}] loss={:0.8f}".format(i+1,n_train_batches, "="*ieq, " "*isp, train_loss, width=ndigits),end="\r",flush=True)
-			train_values = add_values(train_values, results, data)
+			train_accum.add_batch(results, data)
+			del results
 		print("")
 		end = time.time()
 		train_time = end-start
@@ -585,7 +583,7 @@ def train_model(key, model, restored, dataProvider, config,  outputConfig):
 		# Evaluate on validation set.
 		valid_mae = None
 		valid_loss = 0.0
-		valid_values = None
+		valid_accum = ValueAccumulator()
 		start = time.time()
 		for i in range(n_valid_batches):
 			data = dataProvider.next_valid_batch()
@@ -602,7 +600,8 @@ def train_model(key, model, restored, dataProvider, config,  outputConfig):
 			isp=abs(ncharall-ieq)
 			if config.verbose>0:
 				print("Valid : {:{width}d}/{:{width}d} [{}{}] loss={:0.8f}".format(i+1,n_valid_batches, "="*ieq, " "*isp, valid_loss, width=ndigits),end="\r",flush=True)
-			valid_values = add_values(valid_values, results, data)
+			valid_accum.add_batch(results, data)
+			del results
 		print("")
 		end = time.time()
 		valid_time = end-start
@@ -643,8 +642,8 @@ def train_model(key, model, restored, dataProvider, config,  outputConfig):
 			print(s)
 			logger.info(s)
 		if config.verbose>=2:
-			train_props=getProps(train_values)
-			valid_props=getProps(valid_values)
+			train_props=getProps(train_accum.to_dict())
+			valid_props=getProps(valid_accum.to_dict())
 			for key in train_props.keys():	
 				s="   {:<s}".format("-"*74)
 				print(s,flush=True)
@@ -660,14 +659,14 @@ def train_model(key, model, restored, dataProvider, config,  outputConfig):
 			best_train_loss =  train_loss
 			save_best_loss(outputConfig["best_train_loss_file"], train_loss, train_mae)
 			save_chk(outputConfig["best_train_checkpoint"], opt_state.params, model_config, data0)
-			np.savez(outputConfig['best_train_train_set_file'], values = train_values)
-			np.savez(outputConfig['best_train_valid_set_file'], values = valid_values)
+			np.savez(outputConfig['best_train_train_set_file'], values = train_accum.to_dict())
+			np.savez(outputConfig['best_train_valid_set_file'], values = valid_accum.to_dict())
 		if best_valid_loss is None or valid_loss < best_valid_loss:
 			best_valid_loss =  valid_loss
 			save_best_loss(outputConfig["best_valid_loss_file"], valid_loss, valid_mae)
 			save_chk(outputConfig["best_valid_checkpoint"], opt_state.params, model_config, data0)
-			np.savez(outputConfig['best_valid_train_set_file'], values=train_values)
-			np.savez(outputConfig['best_valid_valid_set_file'], values=valid_values)
+			np.savez(outputConfig['best_valid_train_set_file'], values=train_accum.to_dict())
+			np.savez(outputConfig['best_valid_valid_set_file'], values=valid_accum.to_dict())
 		save_chk(outputConfig["step_checkpoint"], opt_state.params, model_config, data0)
 		if current_lr<final_learning_rate:
 			s="Current learning rate = {:0.8e} < final_learning_rate = {:0.8e}".format(current_lr,final_learning_rate)

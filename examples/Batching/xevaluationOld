@@ -1,8 +1,8 @@
 #!/bin/bash
 
-source config-jax.sh
+source config.sh
 
-fn=$PWD/'water_n_structures_800_train_valid.h5'
+fn=$PWD/'water_n_structures_800_train_valid_200.h5'
 list_models=$PWD/chk/validation/best
 fout='evaluation.npz'
 time python  $EQUINNX_SRC/evaluator.py --list_models=$list_models --dataset=$fn --batch_size=10 --verbose=1 --num_structures=-1 --output_file_name=$fout --loss_type=r2mean

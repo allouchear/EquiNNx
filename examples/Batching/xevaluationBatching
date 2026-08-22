@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source config-jax.sh
+source config.sh
 
 fn=$PWD/'evaluation_batched_10_200_0_0_10.h5'
 list_models=$PWD/chk/validation/best
