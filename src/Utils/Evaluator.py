@@ -213,7 +213,8 @@ class Evaluator:
 				keys=list(r.keys())
 				del r
 			if config.verbose>0:
-				print("")
+				#print(f"\r{'=':77}", end="\r", flush=True)
+				print("", flush=True)
 			all_loss += (loss - all_loss)/(i+1)
 			all_mae = add_mae(all_mae, mae, i)
 			print("Model # {} : {}/{} loss={:0.3f}".format(i+1, i+1, len(self._models), loss),flush=True)

@@ -548,6 +548,8 @@ def train_model(key, model, restored, dataProvider, config,  outputConfig):
 
 	if config.verbose>0:
 		print('Total number of epochs =',config.num_epochs,'\njax.jit compilation ......', flush=True)
+		s="{:<s}".format("="*77)
+		print(s,flush=True)
 	transform_value=jnp.inf
 	for epoch in range(1, config.num_epochs + 1):
 		# Loop over train batches.
@@ -576,7 +578,9 @@ def train_model(key, model, restored, dataProvider, config,  outputConfig):
 				print("Train : {:{width}d}/{:{width}d} [{}{}] loss={:0.8f}".format(i+1,n_train_batches, "="*ieq, " "*isp, train_loss, width=ndigits),end="\r",flush=True)
 			train_accum.add_batch(results, data)
 			del results
-		print("")
+		if config.verbose>0:
+			#print(f"\r{' ':80}", end="\r", flush=True)
+			print("",flush=True)
 		end = time.time()
 		train_time = end-start
 
@@ -602,7 +606,9 @@ def train_model(key, model, restored, dataProvider, config,  outputConfig):
 				print("Valid : {:{width}d}/{:{width}d} [{}{}] loss={:0.8f}".format(i+1,n_valid_batches, "="*ieq, " "*isp, valid_loss, width=ndigits),end="\r",flush=True)
 			valid_accum.add_batch(results, data)
 			del results
-		print("")
+		if config.verbose>0:
+			#print(f"\r{' ':80}", end="\r", flush=True)
+			print("",flush=True)
 		end = time.time()
 		valid_time = end-start
 

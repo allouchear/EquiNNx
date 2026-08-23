@@ -1,4 +1,4 @@
-export EQUINNX_DIR=/home/allouche/Works/EquiNNx_22Aout
+export EQUINNX_DIR=/home/allouche/MySoftwares/EquiNNx/
 export EQUINNX_SRC=$EQUINNX_DIR/src
 export EQUINNX_TOOLS=$EQUINNX_DIR/tools
 export EQUINNX_SCRIPTS=$EQUINNX_DIR/scripts/Local
