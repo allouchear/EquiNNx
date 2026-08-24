@@ -560,6 +560,7 @@ def train_model(key, model, restored, dataProvider, config,  outputConfig):
 		dataProvider.reset_valid_batch()
 
 		start = time.time()
+		ieqold=0
 		for i in range(n_train_batches):
 			data = dataProvider.next_train_batch()
 			opt_state, loss, mae, results = train_step(
@@ -574,8 +575,9 @@ def train_model(key, model, restored, dataProvider, config,  outputConfig):
 			train_mae = add_mae(train_mae, mae, i)
 			ieq=int((i+1)*nchartrain)
 			isp=abs(ncharall-ieq)
-			if config.verbose>0:
+			if config.verbose>0 and ieq>ieqold:
 				print("Train : {:{width}d}/{:{width}d} [{}{}] loss={:0.8f}".format(i+1,n_train_batches, "="*ieq, " "*isp, train_loss, width=ndigits),end="\r",flush=True)
+				ieqold=ieq
 			train_accum.add_batch(results, data)
 			del results
 		if config.verbose>0:
@@ -589,6 +591,7 @@ def train_model(key, model, restored, dataProvider, config,  outputConfig):
 		valid_loss = 0.0
 		valid_accum = ValueAccumulator()
 		start = time.time()
+		ieqold=0
 		for i in range(n_valid_batches):
 			data = dataProvider.next_valid_batch()
 			loss, mae, results = eval_step(
@@ -602,8 +605,9 @@ def train_model(key, model, restored, dataProvider, config,  outputConfig):
 			valid_mae = add_mae(valid_mae, mae, i)
 			ieq=int((i+1)*ncharvalid)
 			isp=abs(ncharall-ieq)
-			if config.verbose>0:
+			if config.verbose>0 and ieq>ieqold:
 				print("Valid : {:{width}d}/{:{width}d} [{}{}] loss={:0.8f}".format(i+1,n_valid_batches, "="*ieq, " "*isp, valid_loss, width=ndigits),end="\r",flush=True)
+				ieqold=ieq
 			valid_accum.add_batch(results, data)
 			del results
 		if config.verbose>0:

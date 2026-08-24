@@ -194,6 +194,7 @@ class Evaluator:
 			dataProvider.reset_train_batch()
 			if config.verbose>0:
 				print("Model number ",i+1)
+			ieqold=0
 			for j in range(n_batches):
 				data = dataProvider.next_train_batch()
 				l, m, r = eval_step(
@@ -205,10 +206,11 @@ class Evaluator:
 					)
 				loss += (l - loss)/(j+1)
 				mae = add_mae(mae, m, j)
-				if config.verbose>0:
-					ieq=int((j+1)*nchartrain)
+				ieq=int((j+1)*nchartrain)
+				if config.verbose>0 and ieq>ieqold:
 					isp=abs(ncharall-ieq)
 					print("{:{width}d}/{:{width}d} [{}{}] loss={:0.8f}".format(j+1,n_batches, "="*ieq, " "*isp, loss, width=ndigits),end="\r",flush=True)
+					ieqold=ieq
 				model_accum.add_batch(r, data)
 				keys=list(r.keys())
 				del r
