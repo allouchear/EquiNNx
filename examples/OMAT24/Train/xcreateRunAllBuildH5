@@ -1,0 +1,21 @@
+#!/bin/bash
+
+DIRECTORIES=$(ls -d */)
+CUTOFF=5.0
+#NJOBS=-1
+NJOBS=1
+NUM_STRUCTURES=-1
+s='source ./config.sh'
+fn=xrunAll
+rm -f $fn
+for dir in $DIRECTORIES 
+do
+    echo $dir
+    for f in $dir/db_*.aselmdb; do
+	  echo "$s ; python build_single.py --file "$f" --e0s_file e0s.csv --cutoff $CUTOFF --njobs $NJOBS --num_structures $NUM_STRUCTURES" >> $fn
+    done
+done
+
+chmod u+x $fn
+echo "see $fn file"
+echo "To submit with submitGnuParallel"

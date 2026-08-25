@@ -1,0 +1,9 @@
+#!/bin/bash
+
+lfiles=$(ls *.tar.gz)
+
+for fn in $lfiles
+do
+echo "untar $fn ......."
+tar xvf $fn
+done

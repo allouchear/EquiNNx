@@ -1,0 +1,13 @@
+#!/bin/bash
+
+source ./config.sh
+
+DIRECTORIES=$(ls -d */)
+export PREFIX=omat24
+
+H5_FILES=$(ls */*.h5 2>/dev/null |  tr '\n' ' ')
+if [ -z "$H5_FILES" ]; then
+    echo "ERROR: No intermediate H5 files found in $DIRECTORIES" 
+    exit 1
+fi
+time python merge_h5.py --input $H5_FILES --output ${PREFIX}_merged.h5 
