@@ -332,14 +332,26 @@ class DataProvider:
 		if self._memory_mode == 'ram':
 			if self.verbose>0:
 				print("Loading all batches in memory (memory_mode=ram) .......",flush=True)
+			if self.verbose>0:
+				print("        Train part .......",flush=True)
 			self._data_train = load_batches(batching_file, "train", all_keys)
+			if self.verbose>0:
+				print("        Validation part .......",flush=True)
 			self._data_valid = load_batches(batching_file, "valid", all_keys)
+			if self.verbose>0:
+				print("        Test part .......",flush=True)
 			self._data_test  = load_batches(batching_file, "test",  all_keys)
 		else:
 			if self.verbose>0:
 				print("Loading batches on demand from the batching file (memory_mode=disk, cache_size={}) .......".format(self._cache_size),flush=True)
+			if self.verbose>0:
+				print("        Train part .......",flush=True)
 			self._data_train = _BinnedBatches(batching_file, "train", all_keys, self._cache_size)
+			if self.verbose>0:
+				print("        Validation part .......",flush=True)
 			self._data_valid = _BinnedBatches(batching_file, "valid", all_keys, self._cache_size)
+			if self.verbose>0:
+				print("        Test part .......",flush=True)
 			self._data_test  = _BinnedBatches(batching_file, "test",  all_keys, self._cache_size)
 		n_train = len(self._data_train)
 		n_valid = len(self._data_valid)

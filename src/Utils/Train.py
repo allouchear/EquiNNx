@@ -547,9 +547,7 @@ def train_model(key, model, restored, dataProvider, config,  outputConfig):
 		ndigits=ndigitsvalid
 
 	if config.verbose>0:
-		print('Total number of epochs =',config.num_epochs,'\njax.jit compilation ......', flush=True)
-		s="{:<s}".format("="*77)
-		print(s,flush=True)
+		print('Total number of epochs =',config.num_epochs, '\njax.jit compilation ......', flush=True)
 	transform_value=jnp.inf
 	for epoch in range(1, config.num_epochs + 1):
 		# Loop over train batches.
@@ -571,6 +569,9 @@ def train_model(key, model, restored, dataProvider, config,  outputConfig):
 					opt_state=opt_state,
 					transform_value=transform_value,
 				)
+			if config.verbose>0 and i==0 and epoch==1:
+				s="{:<s}".format("="*77)
+				print(s,flush=True)
 			train_loss += (loss - train_loss)/(i+1)
 			train_mae = add_mae(train_mae, mae, i)
 			ieq=int((i+1)*nchartrain)
