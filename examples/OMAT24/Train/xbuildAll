@@ -1,0 +1,82 @@
+#!/bin/bash
+
+# This is a script to build OMAT24 data for EquiNNx
+# As this dataset contains ~100 millions of structures, it is not recommended to use this script as is. 
+# Please see Readme.md to build the data step by step
+
+#=============================================================================================================================================================
+# Set global variables
+export CUDA_VISIBLE_DEVICES=""
+export GNUPARALLEL="/home/theochem/allouche/Softwares/GnuParallel/bin/parallel"
+export PREFIX=omat24
+source ./config.sh
+#=============================================================================================================================================================
+
+#=============================================================================================================================================================
+# Get dataset from (huggingface)[https://huggingface.co/datasets/facebook/OMAT24]
+wget https://dl.fbaipublicfiles.com/opencatalystproject/data/omat/241018/omat/train/rattled-1000.tar.gz
+wget https://dl.fbaipublicfiles.com/opencatalystproject/data/omat/241018/omat/train/rattled-1000-subsampled.tar.gz
+wget https://dl.fbaipublicfiles.com/opencatalystproject/data/omat/241018/omat/train/rattled-500.tar.gz
+wget https://dl.fbaipublicfiles.com/opencatalystproject/data/omat/241018/omat/train/rattled-500-subsampled.tar.gz
+wget https://dl.fbaipublicfiles.com/opencatalystproject/data/omat/241018/omat/train/rattled-300.tar.gz
+wget https://dl.fbaipublicfiles.com/opencatalystproject/data/omat/241018/omat/train/rattled-300-subsampled.tar.gz
+wget https://dl.fbaipublicfiles.com/opencatalystproject/data/omat/241018/omat/train/aimd-from-PBE-1000-npt.tar.gz
+wget https://dl.fbaipublicfiles.com/opencatalystproject/data/omat/241018/omat/train/aimd-from-PBE-1000-nvt.tar.gz
+wget https://dl.fbaipublicfiles.com/opencatalystproject/data/omat/241018/omat/train/aimd-from-PBE-3000-npt.tar.gz
+wget https://dl.fbaipublicfiles.com/opencatalystproject/data/omat/241018/omat/train/aimd-from-PBE-3000-nvt.tar.gz
+wget https://dl.fbaipublicfiles.com/opencatalystproject/data/omat/241018/omat/train/rattled-relax.tar.gz
+
+#=============================================================================================================================================================
+# Uncompress all .tar.gz file
+lfiles=$(ls *.tar.gz)
+for fn in $lfiles
+do
+	echo "untar $fn ......."
+	tar xvf $fn
+done
+
+#===================================================================================================================
+# Compte average E0s for all atoms using all db_* files in all directorys
+DIRECTORIES=$(ls -d */ |  tr '\n' ',')
+echo $DIRECTORIES
+echo "=== Computing global E0s ===" 
+python compute_e0s_parallel.py --directories=$DIRECTORIES --output e0sP.csv --n_workers $OMP_NUM_THREADS
+
+#=============================================================================================================================================================
+#  Convert all db_* files in all directories in .h5 format
+DIRECTORIES=$(ls -d */)
+CUTOFF=5.0
+NUM_STRUCTURES=-1
+s='source ./config.sh'
+fn=xrunAll
+rm -f $fn
+for dir in $DIRECTORIES 
+do
+    echo $dir
+    for f in $dir/db_*.aselmdb; do
+	  echo "$s ; python build_single.py --file "$f" --e0s_file e0sP.csv --cutoff $CUTOFF --njobs 1 --num_structures $NUM_STRUCTURES" >> $fn
+    done
+done
+
+chmod u+x $fn
+echo "see $fn file"
+
+cat ./$fn | $GNUPARALLEL -X -N 1 --delay 0.2 --verbose --jobs $OMP_NUM_THREADS
+
+#=============================================================================================================================================================
+## Merge all h5 files in one
+DIRECTORIES=$(ls -d */)
+H5_FILES=$(ls */*.h5 2>/dev/null |  tr '\n' ' ')
+if [ -z "$H5_FILES" ]; then
+    echo "ERROR: No intermediate H5 files found in $DIRECTORIES" 
+    exit 1
+fi
+time python merge_h5.py --input $H5_FILES --output ${PREFIX}_merged.h5 
+
+## Build batched h5 file for EquiNNx
+fh5=${PREFIX}_merged.h5
+# for test
+python $EQUINNX_SRC/buildDataBatching.py --dataset=$fh5 --seed=10 --num_train=800 --num_valid=200 --batch_size=10 --num_workers=$OMP_NUM_THREADS --save_data=0 --bins=1
+# To take all data
+#python $EQUINNX_SRC/buildDataBatching.py --dataset=$fh5 --seed=10 --num_train=800000000 --num_valid=20 000000 --batch_size=10 --num_workers=$OMP_NUM_THREADS --save_data=0 --bins=1
+#=============================================================================================================================================================
