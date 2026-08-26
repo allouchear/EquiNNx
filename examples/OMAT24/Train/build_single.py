@@ -156,6 +156,7 @@ def set_idx(mols, cutoff, iBegin, iEnd, iWorker, njobs=1, total=0):
     a_src_idx = []
     a_offsets = []
     n = iEnd - iBegin
+    step = max(1, n // 100)
     for ii, im in enumerate(range(iBegin, iEnd)):
         atoms = mols[im]
         dst_idx, src_idx, offsets = get_idx_list(atoms, cutoff=cutoff)
@@ -163,8 +164,9 @@ def set_idx(mols, cutoff, iBegin, iEnd, iWorker, njobs=1, total=0):
         a_src_idx.append(src_idx[:])
         a_offsets.append(offsets)
         done = iBegin + ii + 1
-        msg = f"  Progress: {done}/{total}" if njobs == 1 else f"  Worker {iWorker}: {ii+1}/{n}"
-        print(f"\r{msg:<40}", end="\r", flush=True)
+        if (ii+1) % step == 0:
+            msg = f"  Progress: {done}/{total}" if njobs == 1 else f"  Worker {iWorker}: {ii+1}/{n}"
+            print(f"\r{msg:<40}", end="\r", flush=True)
     print(f"\r{'':40}", end="\r", flush=True)
     return a_dst_idx, a_src_idx, a_offsets
 
