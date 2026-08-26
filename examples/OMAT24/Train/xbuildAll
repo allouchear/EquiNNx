@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # This is a script to build OMAT24 data for EquiNNx
-# As this dataset contains ~100 millions of structures, it is not recommended to use this script as is. 
+# As OMAT24 dataset contains ~100 millions of structures, it is not recommended to use this script as is. 
 # Please see Readme.md to build the data step by step
 
 #=============================================================================================================================================================
