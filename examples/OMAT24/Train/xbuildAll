@@ -40,7 +40,7 @@ done
 DIRECTORIES=$(ls -d */ |  tr '\n' ',')
 echo $DIRECTORIES
 echo "=== Computing global E0s ===" 
-python compute_e0s_parallel.py --directories=$DIRECTORIES --output e0sP.csv --n_workers $OMP_NUM_THREADS
+python compute_e0s_parallel.py --directories=$DIRECTORIES --output e0s.csv --n_workers $OMP_NUM_THREADS
 
 #=============================================================================================================================================================
 #  Convert all db_* files in all directories in .h5 format
@@ -54,7 +54,7 @@ for dir in $DIRECTORIES
 do
     echo $dir
     for f in $dir/db_*.aselmdb; do
-	  echo "$s ; python build_single.py --file "$f" --e0s_file e0sP.csv --cutoff $CUTOFF --njobs 1 --num_structures $NUM_STRUCTURES" >> $fn
+	  echo "$s ; python build_single.py --file "$f" --e0s_file e0s.csv --cutoff $CUTOFF --njobs 1 --num_structures $NUM_STRUCTURES" >> $fn
     done
 done
 
