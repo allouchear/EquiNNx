@@ -4,5 +4,8 @@ source ./config.sh
 
 export CUDA_VISIBLE_DEVICES=""
 fh5='omat24_merged.h5'
+# to test
 python $EQUINNX_SRC/buildDataBatching.py --dataset=$fh5 --seed=10 --num_train=800 --num_valid=200 --batch_size=10 --num_workers=1 --save_data=0 --bins=1
+# real calculation
+#python $EQUINNX_SRC/buildDataBatching.py --dataset=$fh5 --seed=10 --num_train=80000000 --num_valid=20000000 --batch_size=10 --num_workers=1 --save_data=0 --bins=1
 
