@@ -8,9 +8,7 @@ import sys
 import csv
 import argparse
 from pathlib import Path
-from joblib import Parallel, delayed
 from ase.data import chemical_symbols
-from joblib import cpu_count
 
 
 def read_aselmdb(filename):
@@ -48,45 +46,7 @@ def contains_only(atoms, latoms):
     return unique_elements.issubset(set(latoms))
 
 
-def _scan_db_file(args):
-    db_path, latoms, natoms = args
-    structures = read_aselmdb(str(db_path))
-    local_z = set()
-    for atoms in structures:
-        if atoms is None:
-            continue
-        if not contains_only(atoms, latoms):
-            continue
-        if natoms is not None and atoms.get_atomic_numbers().shape[0] != natoms:
-            continue
-        local_z.update(atoms.get_atomic_numbers().tolist())
-    print('{:8d} {:s} {:s}'.format(len(structures), 'structures scanned in', db_path), flush=True)
-    return local_z
-
-
-def _process_db_file(args):
-    db_path, latoms, natoms, z_table_arr = args
-    structures = read_aselmdb(str(db_path))
-    z_max = int(z_table_arr.max()) + 1
-    ATA_local = np.zeros((len(z_table_arr), len(z_table_arr)))
-    ATB_local = np.zeros(len(z_table_arr))
-    n = 0
-    for atoms in structures:
-        if atoms is None:
-            continue
-        if not contains_only(atoms, latoms):
-            continue
-        if natoms is not None and atoms.get_atomic_numbers().shape[0] != natoms:
-            continue
-        counts = np.bincount(atoms.get_atomic_numbers(), minlength=z_max)[z_table_arr]
-        ATA_local += np.outer(counts, counts)
-        ATB_local += counts * atoms.info["energy"]
-        n += 1
-    print('{:8d} {:s} {:s}'.format(len(structures), 'structures in', db_path), flush=True)
-    return db_path, ATA_local, ATB_local, n
-
-
-def compute_global_e0s(directories, latoms=None, natoms=None, n_workers=8):
+def compute_global_e0s(directories, nmolsmax=-1, latoms=None, natoms=None):
     if isinstance(directories, str):
         directories = [directories]
 
@@ -94,56 +54,56 @@ def compute_global_e0s(directories, latoms=None, natoms=None, n_workers=8):
     for directory in directories:
         folder = Path(directory)
         db_files.extend(sorted(folder.glob('db_*.aselmdb')))
-    print(f"Reading {len(db_files)} files to compute global E0s ({n_workers} workers)...", flush=True)
+    print(f"Reading {len(db_files)} files to compute global E0s...", flush=True)
 
-    tasks = [(str(p), latoms, natoms) for p in db_files]
+    A_rows = []
+    B_vals = []
 
-    # --- Phase 1: discover all unique atomic numbers across the dataset ---
-    print("Phase 1: Scanning for unique elements...", flush=True)
-    scan_results = Parallel(n_jobs=n_workers, verbose=10, prefer="processes")(
-        delayed(_scan_db_file)(t) for t in tasks
-    )
+    n_total = len(db_files)
+    for i_db, db_path in enumerate(db_files, 1):
+        print(f"\t[{i_db}/{n_total}] {db_path.name}...", end=" ", flush=True)
+        structures = read_aselmdb(str(db_path))
+        print(f"{len(structures)} structures", flush=True)
+        for atoms in structures:
+            if nmolsmax > 0 and len(A_rows) >= nmolsmax:
+                break
+            if atoms is None:
+                continue
+            if not contains_only(atoms, latoms):
+                continue
+            if natoms is not None and atoms.get_atomic_numbers().shape[0] != natoms:
+                continue
+            B_vals.append(atoms.info["energy"])
+            A_rows.append(atoms.get_atomic_numbers())
+        del structures
 
+    if not A_rows:
+        print("No molecules found for E0 computation.", flush=True)
+        return {}
+
+    print("Sorting of z table...", flush=True)
     all_z = set()
-    for local_z in scan_results:
-        all_z.update(local_z)
-
-    if not all_z:
-        print("No molecules found for E0 computation.", flush=True)
-        return {}
-
+    for z_arr in A_rows:
+        all_z.update(z_arr.tolist())
     z_table = sorted(list(all_z))
-    z_table_arr = np.array(z_table)
-    print(f"Found {len(z_table)} unique elements.", flush=True)
 
-    # --- Phase 2: accumulate A^T A and A^T B incrementally ---
-    print("Phase 2: Accumulating normal equations...", flush=True)
-    tasks2 = [(str(p), latoms, natoms, z_table_arr) for p in db_files]
-    results = Parallel(n_jobs=n_workers, verbose=10, prefer="processes")(
-        delayed(_process_db_file)(t) for t in tasks2
-    )
+    print("Build A matrix...", flush=True)
+    len_train = len(A_rows)
+    len_zs = len(z_table)
+    A = np.zeros((len_train, len_zs))
+    B = np.array(B_vals)
 
-    ATA_total = np.zeros((len(z_table), len(z_table)))
-    ATB_total = np.zeros(len(z_table))
-    n_total = 0
-    for db_name, ATA_local, ATB_local, n in results:
-        ATA_total += ATA_local
-        ATB_total += ATB_local
-        n_total += n
+    for i, z_arr in enumerate(A_rows):
+        for j, z in enumerate(z_table):
+            A[i, j] = np.count_nonzero(z_arr == z)
 
-    if n_total == 0:
-        print("No molecules found for E0 computation.", flush=True)
-        return {}
-
-    # --- Phase 3: solve the normal equations A^T A * E0 = A^T B ---
-    print(f"Solving normal equations ({n_total} equations, {len(z_table)} unknowns)...", flush=True)
+    print(f"Solving system A·E0s = B ({len(A_rows)} equations, {len(z_table)} unknowns)...", flush=True)
     try:
-        E0s_solution = np.linalg.solve(ATA_total, ATB_total)
+        E0s_solution = np.linalg.lstsq(A, B, rcond=None)[0]
+        e0s_dict = {z: E0s_solution[i] for i, z in enumerate(z_table)}
     except np.linalg.LinAlgError:
-        print("Warning: singular matrix, falling back to lstsq.", flush=True)
-        E0s_solution = np.linalg.lstsq(ATA_total, ATB_total, rcond=None)[0]
-
-    e0s_dict = {z: E0s_solution[i] for i, z in enumerate(z_table)}
+        print("Warning: E0 computation failed. Using 0.0.", flush=True)
+        e0s_dict = {z: 0.0 for z in z_table}
 
     print(f"Global E0s computed for {len(e0s_dict)} elements.", flush=True)
     for z, e0 in sorted(e0s_dict.items()):
@@ -175,7 +135,7 @@ def getArguments():
     parser.add_argument("--directories", type=str, required=True, help="Comma-separated list of directories containing db_*.aselmdb files (e.g. --directories=folder1,folder2)")
     parser.add_argument("--output", type=str, default="e0s.csv", help="Output CSV filename. Default=e0s.csv")
     parser.add_argument("--n_atoms", default=-1, type=int, help="Keep only structures with exactly N atoms. -1 => all")
-    parser.add_argument("--n_workers", default=-1, type=int, help="Number of parallel workers for reading DB files. Default=-1")
+    parser.add_argument("--num_structures", default=-1, type=int, help="Max number of structures per file. -1 => all")
 
     config_file = 'config.txt'
     fromFile = False
@@ -203,15 +163,13 @@ if __name__ == "__main__":
     natoms = args.n_atoms
     if natoms < 0:
         natoms = None
-    n_workers=args.n_workers
-    if n_workers<0: 
-        n_workers=cpu_count()
+    nmolsmax = args.num_structures
 
     e0s_dict = compute_global_e0s(
         args.directories.split(','),
+        nmolsmax=nmolsmax,
         latoms=None,
-        natoms=natoms,
-        n_workers=n_workers
+        natoms=natoms
     )
 
     if e0s_dict:

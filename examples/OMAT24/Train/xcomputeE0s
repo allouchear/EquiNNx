@@ -1,10 +1,11 @@
 #!/bin/bash
 source ./config.sh
 
-DIRECTORIES=$(ls -d tmp/ |  tr '\n' ',')
+DIRECTORIES=$(ls -d */ |  tr '\n' ',')
 export PREFIX=omat24
 echo $DIRECTORIES
 echo "=== Computing global E0s ===" 
-time python compute_e0s.py --directories=$DIRECTORIES --output e0s.csv
+$ime python compute_e0s.py --directories=$DIRECTORIES --output e0s.csv --n_workers 40
+#$ime python compute_e0s_parallel.py --directories=$DIRECTORIES --output e0sP.csv --n_workers -1
     
 
